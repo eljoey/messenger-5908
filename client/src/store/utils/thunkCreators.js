@@ -96,12 +96,14 @@ const sendMessage = (data, body) => {
 export const postMessage = (body) => async (dispatch) => {
   try {
     const data = await saveMessage(body);
+    console.log(body.conversationId);
     if (!body.conversationId) {
       dispatch(addConversation(body.recipientId, data.message));
     } else {
-      dispatch(setNewMessage(data.message, data.sender));
+      dispatch(setNewMessage(data.message));
     }
 
+    dispatch(fetchConversations());
     sendMessage(data, body);
   } catch (error) {
     console.error(error);
