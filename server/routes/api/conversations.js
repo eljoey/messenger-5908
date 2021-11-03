@@ -70,6 +70,8 @@ router.get("/", async (req, res, next) => {
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length - 1].text;
       convoJSON.latestMessageTime = convoJSON.messages[convoJSON.messages.length - 1].createdAt;
+
+      // replace current conversation with updated convo
       conversations[i] = convoJSON;
     }
 
@@ -77,6 +79,26 @@ router.get("/", async (req, res, next) => {
     conversations.sort((a, b) => b.latestMessageTime - a.latestMessageTime);
 
     res.json(conversations);
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+// Updates the read property in all messages in the conversation to true
+// send status 204 for successful update and not returning any content
+router.post('/markRead', async (req, res, next) => {
+  try {
+    const { conversationId, senderId } = req.body;
+
+    await Message.update({ read: true }, {
+      where: {
+        conversationId,
+        senderId
+      },
+    });
+
+    res.status(204).send();
   } catch (error) {
     next(error);
   }
