@@ -39,7 +39,7 @@ const ActiveChat = (props) => {
       await axios.patch("/api/conversations/read-status", body);
     };
 
-    if (conversation.otherUser) {
+    if (conversation.otherUser && conversation.messages.length) {
       setMessagesRead();
     };
   }, [conversation]);

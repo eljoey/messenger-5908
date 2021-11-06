@@ -95,7 +95,7 @@ router.post('/read-status', async (req, res, next) => {
 
     // check if user is part of the conversation
     // throw 403 if not
-    const conversation = await Conversation.findOne({ conversationId });
+    const conversation = await Conversation.findOne({ where: { id: conversationId } });
     if (conversation.user1Id !== userId && conversation.user2Id !== userId) {
       return res.sendStatus(403);
     }
@@ -121,7 +121,7 @@ router.patch('/read-status', async (req, res, next) => {
 
     // check if user is part of the conversation
     // throw 403 if not
-    const conversation = await Conversation.findOne({ conversationId });
+    const conversation = await Conversation.findOne({ where: { id: conversationId } });
     if (conversation.user1Id !== userId && conversation.user2Id !== userId) {
       return res.sendStatus(403);
     }

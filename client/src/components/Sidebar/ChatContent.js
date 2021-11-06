@@ -62,7 +62,7 @@ const ChatContent = (props) => {
       setUnreadMessages(unread);
     };
 
-    if (conversation.otherUser) {
+    if (conversation.otherUser && conversation.messages.length) {
       newMessages();
     }
   }, [conversation, activeConversation, isActiveConversation]);
