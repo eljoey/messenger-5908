@@ -84,12 +84,47 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// Gets the curernt number of unread messages for the recipientId
+router.post('/read-status', async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const userId = req.user.id;
+    const { conversationId, senderId } = req.body;
+
+    // check if user is part of the conversation
+    // throw 403 if not
+    const conversation = await Conversation.findOne({ conversationId });
+    if (conversation.user1Id !== userId && conversation.user2Id !== userId) {
+      return res.sendStatus(403);
+    }
+
+    const count = await Conversation.countNewMessages(conversationId, senderId);
+
+    res.json(count);
+  } catch (error) {
+
+  }
+});
+
 
 // Updates the read property in all messages in the conversation to true
 // send status 204 for successful update and not returning any content
-router.post('/markRead', async (req, res, next) => {
+router.patch('/read-status', async (req, res, next) => {
   try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
     const { conversationId, senderId } = req.body;
+    const userId = req.user.id;
+
+    // check if user is part of the conversation
+    // throw 403 if not
+    const conversation = await Conversation.findOne({ conversationId });
+    if (conversation.user1Id !== userId && conversation.user2Id !== userId) {
+      return res.sendStatus(403);
+    }
 
     await Message.update({ read: true }, {
       where: {
