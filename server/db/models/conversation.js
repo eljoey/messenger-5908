@@ -23,8 +23,7 @@ Conversation.findConversation = async function (user1Id, user2Id) {
 };
 
 Conversation.countNewMessages = async function (conversationId, senderId) {
-  const count = await Message.findAll({
-    attributes: [[Sequelize.fn('COUNT', Sequelize.col('message')), 'newMessageCount']],
+  const count = await Message.count({
     where: {
       conversationId,
       senderId,
@@ -32,7 +31,7 @@ Conversation.countNewMessages = async function (conversationId, senderId) {
     }
   });
 
-  return count[0].dataValues;
+  return count;
 };
 
 module.exports = Conversation;

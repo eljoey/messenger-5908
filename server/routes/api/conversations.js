@@ -85,13 +85,13 @@ router.get("/", async (req, res, next) => {
 });
 
 // Gets the curernt number of unread messages for the recipientId
-router.post('/read-status', async (req, res, next) => {
+router.get('/read-status', async (req, res, next) => {
   try {
     if (!req.user) {
       return res.sendStatus(401);
     }
     const userId = req.user.id;
-    const { conversationId, senderId } = req.body;
+    const { conversationId, senderId } = req.query;
 
     // check if user is part of the conversation
     // throw 403 if not
@@ -101,10 +101,9 @@ router.post('/read-status', async (req, res, next) => {
     }
 
     const count = await Conversation.countNewMessages(conversationId, senderId);
-
     res.json(count);
   } catch (error) {
-
+    next(error);
   }
 });
 

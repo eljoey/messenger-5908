@@ -116,3 +116,14 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
     console.error(error);
   }
 };
+
+// unread message thunk
+export const fetchUnreadMessages = async (conversationId, senderId) => {
+  try {
+    const { data } = await axios.get(`/api/conversations/read-status?conversationId=${conversationId}&senderId=${senderId}`);
+    return data;
+
+  } catch (error) {
+    console.error(error);
+  }
+};

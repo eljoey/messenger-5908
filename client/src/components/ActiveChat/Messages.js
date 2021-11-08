@@ -2,31 +2,32 @@ import React, { useEffect, useState } from "react";
 import { Box } from "@material-ui/core";
 import { SenderBubble, OtherUserBubble } from "../ActiveChat";
 import moment from "moment";
-import axios from "axios";
-
-axios.interceptors.request.use(async function (config) {
-  const token = await localStorage.getItem("messenger-token");
-  config.headers["x-access-token"] = token;
-
-  return config;
-});
+import { fetchUnreadMessages } from "../../store/utils/thunkCreators";
 
 const Messages = (props) => {
   const { messages, otherUser, userId } = props;
   const [lastReadIndex, setLastReadIndex] = useState(-1);
+  const [unreadMessages, setUnreadMessages] = useState(null);
 
   useEffect(() => {
-    let index = messages.length - 1;
+    const getUnreadMessages = async () => {
+      const data = await fetchUnreadMessages(messages[0].conversationId, userId);
+      setUnreadMessages(data);
+    };
+    getUnreadMessages();
 
-    while (index >= 0) {
-      if (messages[index].senderId === userId && messages[index].read) {
+    let count = unreadMessages;
+
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (count === 0 && messages[i].senderId === userId) {
+        setLastReadIndex(i);
         break;
       }
-      index--;
+      if (messages[i].senderId === userId) {
+        count--;
+      }
     }
-
-    setLastReadIndex(index);
-  }, [messages, userId]);
+  }, [messages.length, otherUser.id, unreadMessages, userId]);
 
   return (
     <Box>
