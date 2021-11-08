@@ -14,6 +14,9 @@ const Messages = (props) => {
       const data = await fetchUnreadMessages(messages[0].conversationId, userId);
       setUnreadMessages(data);
     };
+    if (!messages.length) {
+      return;
+    }
     getUnreadMessages();
 
     let count = unreadMessages;
