@@ -102,7 +102,6 @@ export const postMessage = (body) => async (dispatch) => {
     } else {
       dispatch(setNewMessage(data.message, data.sender));
     }
-
     sendMessage(data, body);
   } catch (error) {
     console.error(error);
@@ -113,6 +112,17 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   try {
     const { data } = await axios.get(`/api/users/${searchTerm}`);
     dispatch(setSearchedUsers(data));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// unread message thunk
+export const fetchUnreadMessages = async (conversationId, senderId) => {
+  try {
+    const { data } = await axios.get(`/api/conversations/read-status?conversationId=${conversationId}&senderId=${senderId}`);
+    return data;
+
   } catch (error) {
     console.error(error);
   }

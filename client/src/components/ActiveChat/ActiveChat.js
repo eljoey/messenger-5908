@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
+import axios from "axios";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -20,10 +21,28 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
+axios.interceptors.request.use(async function (config) {
+  const token = await localStorage.getItem("messenger-token");
+  config.headers["x-access-token"] = token;
+
+  return config;
+});
+
 const ActiveChat = (props) => {
   const classes = useStyles();
   const { user } = props;
   const conversation = props.conversation || {};
+
+  useEffect(() => {
+    const setMessagesRead = async () => {
+      const body = { conversationId: conversation.id, senderId: conversation.otherUser.id };
+      await axios.patch("/api/conversations/read-status", body);
+    };
+
+    if (conversation.otherUser && conversation.messages.length) {
+      setMessagesRead();
+    };
+  }, [conversation]);
 
   return (
     <Box className={classes.root}>

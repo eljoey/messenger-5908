@@ -70,6 +70,8 @@ router.get("/", async (req, res, next) => {
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length - 1].text;
       convoJSON.latestMessageTime = convoJSON.messages[convoJSON.messages.length - 1].createdAt;
+
+      // replace current conversation with updated convo
       conversations[i] = convoJSON;
     }
 
@@ -77,6 +79,60 @@ router.get("/", async (req, res, next) => {
     conversations.sort((a, b) => b.latestMessageTime - a.latestMessageTime);
 
     res.json(conversations);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Gets the curernt number of unread messages for the recipientId
+router.get('/read-status', async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const userId = req.user.id;
+    const { conversationId, senderId } = req.query;
+
+    // check if user is part of the conversation
+    // throw 403 if not
+    const conversation = await Conversation.findOne({ where: { id: conversationId } });
+    if (conversation.user1Id !== userId && conversation.user2Id !== userId) {
+      return res.sendStatus(403);
+    }
+
+    const count = await Conversation.countNewMessages(conversationId, senderId);
+    res.json(count);
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+// Updates the read property in all messages in the conversation to true
+// send status 204 for successful update and not returning any content
+router.patch('/read-status', async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const { conversationId, senderId } = req.body;
+    const userId = req.user.id;
+
+    // check if user is part of the conversation
+    // throw 403 if not
+    const conversation = await Conversation.findOne({ where: { id: conversationId } });
+    if (conversation.user1Id !== userId && conversation.user2Id !== userId) {
+      return res.sendStatus(403);
+    }
+
+    await Message.update({ read: true }, {
+      where: {
+        conversationId,
+        senderId
+      },
+    });
+
+    res.status(204).send();
   } catch (error) {
     next(error);
   }
