@@ -14,7 +14,7 @@ Conversation.countNewMessages = async function (conversationId, userId) {
         [Op.ne]: userId
       },
       readStatus: {
-        read: true,
+        read: false,
         readBy: {
           [Op.ne]: userId
         }
